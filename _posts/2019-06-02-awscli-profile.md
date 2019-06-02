@@ -1,5 +1,5 @@
 ---
-title: AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정 
+title: AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정  (7mins)
 published: true
 ---
 **Table of Contents**
@@ -177,12 +177,12 @@ region = ap-northeast-2
 
 이 경우에도 `--profile` 옵션 역시 평소와 같이 쓰면 된다.
 ```bash
-## default profile 을 사용한 명령어
+## default profile 을 사용한 명령
 $ aws s3 
 
-## role-a profile 을 사용한 명령어
+## role-a profile 을 사용한 명령
 $ aws s3 --profile role-a
 
-## target profile 을 사용한 명령어 
+## target profile 을 사용한 명령
 $ aws s3 --profile target
 ```
