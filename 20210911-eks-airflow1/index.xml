@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>20210911-Eks-Airflow1s on 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link>https://stevenshim.github.io/20210911-eks-airflow1/</link>
+    <description>Recent content in 20210911-Eks-Airflow1s on 개발 못하는 개발자, 인프라 모르는 운영자</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Sat, 11 Sep 2021 00:00:00 +0900</lastBuildDate>
+    <atom:link href="https://stevenshim.github.io/20210911-eks-airflow1/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 1 설치전 고려 사항들</title>
+      <link>https://stevenshim.github.io/20210911-eks-airflow1/2021-09-11-eks-airflow-1/</link>
+      <pubDate>Sat, 11 Sep 2021 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20210911-eks-airflow1/2021-09-11-eks-airflow-1/</guid>
+      <description>들어가며 이번 글은 운영환경에서도 쓸만한 수준의 Airflow 2.x 를 EKS 환경에 구축하는 내용을 다뤄보려고 합니다. 과거에 Airflow 1.x 을 파이프라인 도구 테스트 목적으로 아주 간단하게 사용한 경험은 있지만, 데이터 엔지니어만큼 심도 있게 사용해본 적도 없거니와, 신규 기능이 런칭을 것을 계속 확인한 것도 아니기에 자세히 알고 있진 않았습니다.&#xA;최근 개발팀의 요구 사항으로 Airflow 2.x 를 EKS에 구축을 하게 되었는데, Airflow의 특징, AWS와 EKS(Kubernetes)에 대한 기초 이상 수준의 이해가 필요하다 느껴져, 구축 경험을 글로 적어봅니다.</description>
+    </item>
+  </channel>
+</rss>

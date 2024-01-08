@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko-kr">
+  <head>
+    <title>Route53 DNS Delegation (DNS 위임) // 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.121.2">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Hojin Shim" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.5b1fcc8902588589c4767187402a3c29f8b8d7a6fdef6d9f8f77045bb0d14fee.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Route53 DNS Delegation (DNS 위임)"/>
+<meta name="twitter:description" content="개요 도메인 주소를 관리를 할 때, 주로 관리의 문제를 해소, 권한 분리 등의 주로 사용할 수 있는 방법으로, DNS Delegation (DNS 위임)을 사용할 수 있습니다.
+이번 내용은 AWS Route53에서 DNS 위임을 어떻게 진행하는지, 실무 환경에서 활용 방법, 위임 시 주의할 점은 무엇인지 다뤄보려고 합니다.
+개념의 용어(Term)로, 영어는 DNS Delegation, Domain Delegation, 한글은 도메인 위임, DNS 위임 등 다양하게 쓰이는 것으로 보입니다. Domain Delegation 혹은 도메인 위임이 틀린 용어인지는 모르겠으나, DNS Delegation 혹은 DNS 위임이라는 용어를 더 많이 사용하는 것으로 보입니다,"/>
+
+    <meta property="og:title" content="Route53 DNS Delegation (DNS 위임)" />
+<meta property="og:description" content="개요 도메인 주소를 관리를 할 때, 주로 관리의 문제를 해소, 권한 분리 등의 주로 사용할 수 있는 방법으로, DNS Delegation (DNS 위임)을 사용할 수 있습니다.
+이번 내용은 AWS Route53에서 DNS 위임을 어떻게 진행하는지, 실무 환경에서 활용 방법, 위임 시 주의할 점은 무엇인지 다뤄보려고 합니다.
+개념의 용어(Term)로, 영어는 DNS Delegation, Domain Delegation, 한글은 도메인 위임, DNS 위임 등 다양하게 쓰이는 것으로 보입니다. Domain Delegation 혹은 도메인 위임이 틀린 용어인지는 모르겠으나, DNS Delegation 혹은 DNS 위임이라는 용어를 더 많이 사용하는 것으로 보입니다," />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://stevenshim.github.io/20210924-dns-deligation/2021-09-24-dns-deligation/" /><meta property="article:section" content="20210924-dns-deligation" />
+<meta property="article:published_time" content="2021-09-24T00:00:00+09:00" />
+<meta property="article:modified_time" content="2021-09-24T00:00:00+09:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://stevenshim.github.io/"><img class="app-header-avatar" src="/images/me.jpg" alt="Hojin Shim" /></a>
+      <span class="app-header-title">개발 못하는 개발자, 인프라 모르는 운영자</span>
+      <p>Site Reliability Engineer</p>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">Route53 DNS Delegation (DNS 위임)</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Sep 24, 2021
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="개요">개요</h1>
+<p>도메인 주소를 관리를 할 때, 주로 관리의 문제를 해소, 권한 분리 등의 주로 사용할 수 있는 방법으로, DNS Delegation (DNS 위임)을 사용할 수 있습니다.</p>
+<p>이번 내용은 AWS Route53에서 DNS 위임을 어떻게 진행하는지, 실무 환경에서 활용 방법, 위임 시 주의할 점은 무엇인지 다뤄보려고 합니다.</p>
+<blockquote>
+<p>개념의 용어(Term)로, 영어는 <code>DNS Delegation</code>, <code>Domain Delegation</code>, 한글은 <code>도메인 위임</code>, <code>DNS 위임</code> 등 다양하게 쓰이는 것으로 보입니다. <code>Domain Delegation</code> 혹은 <code>도메인 위임</code>이 틀린 용어인지는 모르겠으나, <code>DNS Delegation</code> 혹은 <code>DNS 위임</code>이라는 용어를 더 많이 사용하는 것으로 보입니다,</p>
+</blockquote>
+<h2 id="dns-delegation의-개념">DNS Delegation의 개념</h2>
+<p>DNS 위임은 상위 도메인에서 동위 혹은 하위 도메인에 대한 권한/관리를 위임하는 내용입니다.</p>
+<p>도메인에는 <code>.</code> (root) 도메인이 존재하며, 이 하위에는 <code>.com</code>, <code>.net</code>, <code>.io</code> 등 최상위 도메인이 있으며, 일반적으로 우리가 구매하는 도메인은 이 최상위 도메인에서 구매한 <code>some-name.io</code> 같은 것이 있습니다.</p>
+<p>위 내용을 간소하여 설명하면 <code>.</code> -&gt; <code>.io</code> -&gt; <code>some-name.io</code> 순으로 위임이 되어있습니다.</p>
+<p>구매한 도메인(some-name.io)에 대해서 혹은 구매한 도메인의 sub-domain에 대해서 재위임을 할 수 있는데, 이렇게 다시 위임하여 관리의 목적을 달성할 수 있습니다.</p>
+<blockquote>
+<p>실무에서 DNS 위임을 하는 목적은 위에 설명한 내용과 부합합니다.<!-- raw HTML omitted -->
+예를 들어, 개발 환경 도메인의 Hosted Zone을 분리하여, 개발팀이 좀 더 자유롭게 DNS Record를 추가하게 할 수 있습니다.<!-- raw HTML omitted -->
+혹은 DNS Record 가 너무 많은 경우, 첫 번째 sub-domain 별로 나누어 관리하는 것도 가능합니다.</p>
+</blockquote>
+<h2 id="dns-위임하기">DNS 위임하기</h2>
+<blockquote>
+<p>보통 도메인을 구매하면 도메인 업체 서비스에서 DNS 관리 기능을 포함합니다.</p>
+</blockquote>
+<p>여기서부터는 우리가 구매한 도메인에 대해서 위임을 하므로, 최상위 도메인의 위임 과정은 잠시 잊고, 우리 도메인을 어떻게 위임하는지 알아보도록 하겠습니다.</p>
+<p>DNS 위임은 <code>질의(DNS lookup)</code>해야 할 Name Server를 위임하고 싶은 서버로 지정하는 것입니다.</p>
+<p>즉, 동위 수준에서 위임, 혹은 하위 도메인(sub-domain)을 위임하는게 가능합니다.</p>
+<h3 id="dns-질의-과정">DNS 질의 과정</h3>
+<p><img src="/images/2021-09-24-dns-deligation/dns-lookup.jpg" alt=""><!-- raw HTML omitted -->
+<em>Figure 1 - DNS Query 과정 (root dns query 생략)</em></p>
+<p>예를 들어, jenkins.dev.example.io에 대해 DNS Query가 수행되는 과정을 설명했습니다.</p>
+<ol>
+<li>사용자 브라우저에서 jenkins.dev.example.io를 접속합니다.</li>
+<li>Local DNS에서는 캐싱 된 레코드가 없을 수 있고, AWS Route53의 Hosted Zone으로 관리하는 Name Server로 질의를 합니다.</li>
+<li>example.io 도메인에 대한 Hosted Zone에는 dev.example.io에 대한 Name Server(NS) 레코드를 가지고 있기에, 다른 Name Server 주소를 반환합니다.</li>
+<li>dev.example.io Hosted Zone에 다시 질의를 합니다.</li>
+<li>jenkins.dev.example.io의 A레코드가 존재한다면 이를 응답합니다.</li>
+<li>Local DNS는 다시 브라우저에 IP 정보를 응답합니다.</li>
+</ol>
+<h3 id="route53에서-dns-위임">Route53에서 DNS 위임</h3>
+<p>내가 소유한 도메인 내에서 DNS 위임은 매우 간단합니다.<!-- raw HTML omitted -->
+example.io 도메인을 내가 직접 소유하고, Route53의 Hosted Zone으로 관리한다고 가정하겠습니다.<!-- raw HTML omitted -->
+dev.example.io 도메인을 만들고, 이를 별도의 Hosted Zone에 관리하도록 하려면 아래와 같이 진행하면 됩니다.</p>
+<ol>
+<li>dev.example.io 도메인에 대한 Hosted Zone 생성</li>
+<li>dev.example.io Hosted Zone을 확인하면 NS 레코드가 있습니다.
+<img src="/images/2021-09-24-dns-deligation/dev-ns-record.png" alt=""><!-- raw HTML omitted -->
+<em>Figure 2 - dev.example.io의 NS 레코드</em>
+<!-- raw HTML omitted --><!-- raw HTML omitted --></li>
+<li>이 dev.example.io 에 대한 NS 레코드를 example.io에 추가합니다.
+<img src="/images/2021-09-24-dns-deligation/add-ns-record.png" alt=""><!-- raw HTML omitted -->
+<em>Figure 3 - (좌) example.io Hosted Zone / (우) dev.example.io Hosted Zone</em>
+<!-- raw HTML omitted --><!-- raw HTML omitted --></li>
+</ol>
+<h3 id="주의사항---운영-중인-서비스의-dns-위임-시">주의사항 - 운영 중인 서비스의 DNS 위임 시</h3>
+<p>방법은 간단하지만 운영 중인 실제 서비스에서 위임을 할 경우, 정말 주의해야 하는 것이 있습니다.
+위임하려는 sub-domain으로 끝나는 모든 레코드를, 위임할 Hosted Zone에 미리 동일하게 생성해두어야 합니다.</p>
+<p>예를 들어, example.io Hosted Zone에 foo.dev.example.io 레코드가 이미 존재하고 있었다면, example.io에 dev.example.io NS 레코드를 추가하기 전에 dev.example.io Hosted Zone에 dev.example.io로 끝나는 모든 레코드를 준비해두어야 합니다.</p>
+<p><img src="/images/2021-09-24-dns-deligation/no-record-after-delegation.png" alt=""><!-- raw HTML omitted -->
+<em>Figure 4 - 위임할 Hosted Zone에 레코드 준비 누락 시, 질의 불가</em></p>
+<h3 id="aws-multi-account-환경에서-dns-위임-전략">AWS Multi Account 환경에서 DNS 위임 전략</h3>
+<p>위 예시로 보신 것과 같이 DNS 위임은 그리 어려운 과정이 아닙니다.
+만약 다수의 AWS 계정을 운영한다면, 최상위 root account 혹은 개별 root account에서 소유 중인 Domain을 관리하고, 계정별로 DNS 위임을 하여 관리하는 것도 좋은 전략이라 생각합니다.
+<img src="/images/2021-09-24-dns-deligation/multi-account-dns-delegation.jpg" alt=""><!-- raw HTML omitted -->
+<em>Figure 5 - 여러 계정을 쓸 때 위임하여 관리하기</em></p>
+<h2 id="마무리">마무리</h2>
+<p>DNS 관리는 보통 시스템 엔지니어 혹은 네트워크 엔지니어 등 인프라 조직에서 주로 하다 보니, 개발자가 흔히 하는 업무는 아닐 수 있습니다.
+하지만 개념이 그리 어렵지 않고, 과정도 매우 쉽기 때문에 알아두면 사용하기 좋은 전략이 될 수 있습니다.</p>
+<p>작은 조직에서 개발팀이 DNS 관리까지 하는 경우라면, 미리 위임 전략을 고민하고 시작하면 훗날 위임 시 레코드 마이그레이션을 하는 번거로움을 줄일 수 있습니다.</p>
+<p>준비가 된다면 AWS Route53의 Hosted Zone 간 Record Sync를 맞추는 스크립트를 공개해 보겠습니다.</p>
+<h3 id="관련-문서">관련 문서</h3>
+<ul>
+<li><a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingNewSubdomain.html">https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingNewSubdomain.html</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/reviewing-dns-concepts#delegation">https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/reviewing-dns-concepts#delegation</a></li>
+<li><a href="https://docs.microsoft.com/ko-kr/azure/dns/dns-domain-delegation">https://docs.microsoft.com/ko-kr/azure/dns/dns-domain-delegation</a></li>
+</ul>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

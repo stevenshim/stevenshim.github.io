@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>20190602-Awscli-Profiles on 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link>https://stevenshim.github.io/20190602-awscli-profile/</link>
+    <description>Recent content in 20190602-Awscli-Profiles on 개발 못하는 개발자, 인프라 모르는 운영자</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Sun, 02 Jun 2019 00:00:00 +0900</lastBuildDate>
+    <atom:link href="https://stevenshim.github.io/20190602-awscli-profile/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정</title>
+      <link>https://stevenshim.github.io/20190602-awscli-profile/2019-06-02-awscli-profile/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20190602-awscli-profile/2019-06-02-awscli-profile/</guid>
+      <description>Table of Contents&#xA;들어가며 Prerequisites AWS CLI Profile 설정 (기초) 기본 Profile 설정하기 Profile 추가하기 (Access Key Pair) AWS CLI Profile 설정 (중급) Profile 추가하기 (Role ARN) EC2에 할당된 IAM Role 을 이용하여 Profile 추가하기 (Role ARN) Source profile 에 다른 profile 사용하기 들어가며 AWS CLI 에는 하나 이상의 Profile 설정이 가능하고, 각 Profile 마다 Access Keypair 혹은 Assume Role 을 지정할 수 있다.&#xA;이 방식으로 다양한 Use-case 를 만들 수 있다.</description>
+    </item>
+  </channel>
+</rss>

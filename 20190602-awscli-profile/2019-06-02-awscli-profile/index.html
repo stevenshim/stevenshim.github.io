@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko-kr">
+  <head>
+    <title>AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정 // 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.121.2">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Hojin Shim" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.5b1fcc8902588589c4767187402a3c29f8b8d7a6fdef6d9f8f77045bb0d14fee.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/><meta name="twitter:title" content="AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정"/>
+<meta name="twitter:description" content="Table of Contents
+들어가며 Prerequisites AWS CLI Profile 설정 (기초) 기본 Profile 설정하기 Profile 추가하기 (Access Key Pair) AWS CLI Profile 설정 (중급) Profile 추가하기 (Role ARN) EC2에 할당된 IAM Role 을 이용하여 Profile 추가하기 (Role ARN) Source profile 에 다른 profile 사용하기 들어가며 AWS CLI 에는 하나 이상의 Profile 설정이 가능하고, 각 Profile 마다 Access Keypair 혹은 Assume Role 을 지정할 수 있다.
+이 방식으로 다양한 Use-case 를 만들 수 있다."/>
+
+    <meta property="og:title" content="AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정" />
+<meta property="og:description" content="Table of Contents
+들어가며 Prerequisites AWS CLI Profile 설정 (기초) 기본 Profile 설정하기 Profile 추가하기 (Access Key Pair) AWS CLI Profile 설정 (중급) Profile 추가하기 (Role ARN) EC2에 할당된 IAM Role 을 이용하여 Profile 추가하기 (Role ARN) Source profile 에 다른 profile 사용하기 들어가며 AWS CLI 에는 하나 이상의 Profile 설정이 가능하고, 각 Profile 마다 Access Keypair 혹은 Assume Role 을 지정할 수 있다.
+이 방식으로 다양한 Use-case 를 만들 수 있다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://stevenshim.github.io/20190602-awscli-profile/2019-06-02-awscli-profile/" /><meta property="article:section" content="20190602-awscli-profile" />
+<meta property="article:published_time" content="2019-06-02T00:00:00+09:00" />
+<meta property="article:modified_time" content="2019-06-02T00:00:00+09:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://stevenshim.github.io/"><img class="app-header-avatar" src="/images/me.jpg" alt="Hojin Shim" /></a>
+      <span class="app-header-title">개발 못하는 개발자, 인프라 모르는 운영자</span>
+      <p>Site Reliability Engineer</p>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jun 2, 2019
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          4 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <p><strong>Table of Contents</strong></p>
+<ul>
+<li><a href="#%EB%93%A4%EC%96%B4%EA%B0%80%EB%A9%B0">들어가며</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#aws-cli-profile-%EC%84%A4%EC%A0%95-%EA%B8%B0%EC%B4%88">AWS CLI Profile 설정 (기초)</a>
+<ul>
+<li><a href="#%EA%B8%B0%EB%B3%B8-profile-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0">기본 Profile 설정하기</a></li>
+<li><a href="#profile-%EC%B6%94%EA%B0%80%ED%95%98%EA%B8%B0-access-key-pair">Profile 추가하기 (Access Key Pair)</a></li>
+</ul>
+</li>
+<li><a href="#aws-cli-profile-%EC%84%A4%EC%A0%95-%EC%A4%91%EA%B8%89">AWS CLI Profile 설정 (중급)</a>
+<ul>
+<li><a href="#profile-%EC%B6%94%EA%B0%80%ED%95%98%EA%B8%B0-role-arn">Profile 추가하기 (Role ARN)</a></li>
+<li><a href="#ec2%EC%97%90-%ED%95%A0%EB%8B%B9%EB%90%9C-iam-role-%EC%9D%84-%EC%9D%B4%EC%9A%A9%ED%95%98%EC%97%AC-profile-%EC%B6%94%EA%B0%80%ED%95%98%EA%B8%B0-role-arn">EC2에 할당된 IAM Role 을 이용하여 Profile 추가하기 (Role ARN)</a></li>
+<li><a href="#source-profile-%EC%97%90-%EB%8B%A4%EB%A5%B8-profile-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0">Source profile 에 다른 profile 사용하기</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="들어가며">들어가며</h1>
+<p>AWS CLI 에는 하나 이상의 Profile 설정이 가능하고, 각 Profile 마다 Access Keypair 혹은 Assume Role 을 지정할 수 있다.<br>
+이 방식으로 다양한 Use-case 를 만들 수 있다.</p>
+<ul>
+<li>각 Profile 마다 서로 다른 AWS Account의 Access Key Pair 를 설정</li>
+<li>기본 Profile 에는 Read 권한만 설정 후, 추가 Profile 에 더 많은 권한을 설정.</li>
+<li>Assume Role 을 활용하여 내 계정, 혹은 다른 계정의 Role 을 위임 받는 방식으로 관리</li>
+</ul>
+<h1 id="prerequisites">Prerequisites</h1>
+<ul>
+<li><a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html">AWS CLI 설치</a></li>
+<li>Access Key Pair 준비</li>
+<li>IAM Role 준비 - Assume Role 방식의 profile 설정 원할 경우 (중급 내용)</li>
+</ul>
+<h1 id="aws-cli-profile-설정-기초">AWS CLI Profile 설정 (기초)</h1>
+<h2 id="기본-profile-설정하기">기본 Profile 설정하기</h2>
+<p>AWS CLI의 default profile 설정은 아래 명령어로 수행할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ aws configure
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>AWS Access Key ID <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>        : AKIAIOSFOD111EXAMPLE
+</span></span><span style="display:flex;"><span>AWS Secret Access Key <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>    : wJalrXUtnFEMI/K7MDENG/bPxR111EXAMPLEKEY
+</span></span><span style="display:flex;"><span>Default region name <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>      : ap-northeast-2
+</span></span><span style="display:flex;"><span>Default output format <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>    : json
+</span></span></code></pre></div><p>위 명령어로 설정한 Profile 정보는 아래 경로에 저장된다.</p>
+<p><strong>Linux &amp; Mac</strong></p>
+<blockquote>
+<p>~/.aws/config<br>
+~/.aws/credentials</p>
+</blockquote>
+<p><strong>Windows</strong></p>
+<blockquote>
+<p>%USERPROFILE%.aws\config<br>
+%USERPROFILE%.aws\credentials</p>
+</blockquote>
+<h2 id="profile-추가하기-access-key-pair">Profile 추가하기 (Access Key Pair)</h2>
+<p>만약 다른 User 혹은 다른 계정의 Access Key Pair 를 추가하고자 할 때는 아래처럼 옵션으로 추가할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ aws configure --profile user-a
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>AWS Access Key ID <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>        : AKIAIOSFOD111EXAMPLE2
+</span></span><span style="display:flex;"><span>AWS Secret Access Key <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>    : wJalrXUtnFEMI/K7MDENG/bPxR111EXAMPLEKEY2
+</span></span><span style="display:flex;"><span>Default region name <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>      : us-west-2
+</span></span><span style="display:flex;"><span>Default output format <span style="color:#f92672">[</span>None<span style="color:#f92672">]</span>    : json
+</span></span></code></pre></div><p>추가된 Profile 의 Credential 로 AWS CLI 명령을 수행하려면 <code>--profile</code> 옵션을 사용한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ aws s3 ls --profile user-a
+</span></span></code></pre></div><p><code>.aws/config</code> 와 <code>.aws/credentials</code> 파일을 열어서 저장된 결과를 보면 아래와 같다.</p>
+<p><strong>.aws/config 파일</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">[</span>default<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>region<span style="color:#f92672">=</span>ap-northeast-2
+</span></span><span style="display:flex;"><span>output<span style="color:#f92672">=</span>json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>profile user-a<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>region<span style="color:#f92672">=</span>us-west-2
+</span></span><span style="display:flex;"><span>output<span style="color:#f92672">=</span>json
+</span></span></code></pre></div><p><strong>.aws/credentials 파일</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">[</span>default<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>aws_access_key_id<span style="color:#f92672">=</span>AKIAIOSFOD111EXAMPLE
+</span></span><span style="display:flex;"><span>aws_secret_access_key<span style="color:#f92672">=</span>wJalrXUtnFEMI/K7MDENG/bPxR111EXAMPLEKEY
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>user1<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>aws_access_key_id<span style="color:#f92672">=</span>AKIAIOSFOD111EXAMPLE2
+</span></span><span style="display:flex;"><span>aws_secret_access_key<span style="color:#f92672">=</span>wJalrXUtnFEMI/K7MDENG/bPxR111EXAMPLEKEY2
+</span></span></code></pre></div><h1 id="aws-cli-profile-설정-중급">AWS CLI Profile 설정 (중급)</h1>
+<p>중급으로 분리한 이유는, 아래 내용은 IAM 에 대해 조금 더 이해하고 있어야 하기 때문이다.<br>
+IAM 을 잘 다루는 사람이라면 아래 내용은 매우 쉽게 느껴질 것이다.</p>
+<h2 id="profile-추가하기-role-arn">Profile 추가하기 (Role ARN)</h2>
+<p>IAM Role 역시 profile 로 등록할 수 있다.<br>
+이 경우는 IAM User 가 Role 권한을 위임 받을 수 있도록 <strong>Assume Role 설정이 사전에 되어 있어야 한다.</strong><br>
+IAM Role 준비되지 않았다면, 아래 문서를 보고 IAM Role 을 준비하자.<br>
+<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user.html">IAM User 에게 위임 가능한 IAM Role 생성하기.</a></p>
+<p>Role ARN 을 추가하려면 config 를 직접 수정해야 한다.<br>
+<code>role-a</code> 설정을 추가하도록 하자.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ vi ~/.aws/config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>default<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>region<span style="color:#f92672">=</span>ap-northeast-2
+</span></span><span style="display:flex;"><span>output<span style="color:#f92672">=</span>json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>profile user-a<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>region<span style="color:#f92672">=</span>us-west-2
+</span></span><span style="display:flex;"><span>output<span style="color:#f92672">=</span>json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>profile role-a<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>role_arn <span style="color:#f92672">=</span> arn:aws:iam::0774477123456:role/admin_role
+</span></span><span style="display:flex;"><span>source_profile <span style="color:#f92672">=</span> default
+</span></span><span style="display:flex;"><span>region <span style="color:#f92672">=</span> ap-northeast-2
+</span></span></code></pre></div><p>Role ARN 을 Profile 로 등록하는 경우 <em>너무나도 당연하지만</em> Access Key Pair를 등록하는 과정과 2가지 차이점이 있다.</p>
+<ul>
+<li><code>source_profie = default</code> 설정
+<ul>
+<li>Role 을 Assume 하려면 Assume 할 Credential 이 필요하다.</li>
+</ul>
+</li>
+<li>~/.aws/credentials 에는 credentail 설정을 추가할 필요가 없음</li>
+</ul>
+<h2 id="ec2에-할당된-iam-role-을-이용하여-profile-추가하기-role-arn">EC2에 할당된 IAM Role 을 이용하여 Profile 추가하기 (Role ARN)</h2>
+<blockquote>
+<p>이 use-case 는 EC2 내부에서 EC2에 할당된 Role을 이용하는 AWS CLI를 설정할 경우이다.</p>
+</blockquote>
+<p>간혹 Bastion Host 나, Admin 전용 EC2 등에 IAM Role 을 할당하여 사용하는 경우가 있다.<br>
+위와 같은 EC2 내부에서 AWS CLI 를 사용 할 경우, IAM User Credential 없이 Instance Profile (Ec2InstanceMetadata) 를 가져다가 사용할 수 있다.</p>
+<p><strong>~/.aws/config 를 수정해보자.</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">[</span>default<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>region <span style="color:#f92672">=</span> ap-northeast-2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>profile role-b<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>role_arn <span style="color:#f92672">=</span> arn:aws:iam::1234567890123:role/another_account_role
+</span></span><span style="display:flex;"><span>credential_source <span style="color:#f92672">=</span> Ec2InstanceMetadata
+</span></span><span style="display:flex;"><span>region <span style="color:#f92672">=</span> ap-northeast-2
+</span></span></code></pre></div><p><code>credential_source = Ec2InstanceMetadata</code> 설정을 통해 EC2 에 할당된 IAM Role 을 사용할 수 있다.</p>
+<h2 id="source-profile-에-다른-profile-사용하기">Source profile 에 다른 profile 사용하기</h2>
+<p>이 use-case 는 일반적이진 않을 수 있다.</p>
+<ul>
+<li>다양한 사람과 co-work 하는 환경에서 조금 더 복잡한 권한 체계를 사용하는 경우</li>
+<li>내 PC 에서 Role A의 권한을 위임받고, 바로 다시 Role B의 권한을 이어서 위임 받는 경우</li>
+</ul>
+<p>Role Assuming 은 꼭 IAM User 의 Credential 에서 한 단계만 가능한것은 아니다.<br>
+IAM User -&gt; Role A -&gt; Role B assuming 도 가능한데, 이해를 돕고자 아래 Figure 1-1 을 추가한다.</p>
+<p><strong>Figure 1-1</strong><br>
+<img src="img/2019-06-02-awscli-profile/assume-role-to-role.png" alt=""></p>
+<p>그럼 <code>source_profile</code> 을 설정해보자.</p>
+<p><strong>~/.aws/config 를 수정해보자.</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">[</span>default<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>output <span style="color:#f92672">=</span> json
+</span></span><span style="display:flex;"><span>region <span style="color:#f92672">=</span> ap-northeast-2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>profile role-a<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>role_arn <span style="color:#f92672">=</span> arn:aws:iam::0774477123456:role/admin_role
+</span></span><span style="display:flex;"><span>source_profile <span style="color:#f92672">=</span> default
+</span></span><span style="display:flex;"><span>region <span style="color:#f92672">=</span> ap-northeast-2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>profile target<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>role_arn <span style="color:#f92672">=</span> arn:aws:iam::1234567890123:role/another_account_role
+</span></span><span style="display:flex;"><span>source_profile <span style="color:#f92672">=</span> role-a
+</span></span><span style="display:flex;"><span>region <span style="color:#f92672">=</span> ap-northeast-2
+</span></span></code></pre></div><p>이 처럼,</p>
+<ul>
+<li><code>role-a</code> 의 <code>source_profile</code> 은 <code>default</code> 로 설정 하고,</li>
+<li><code>role-b</code> 의 <code>source_profile</code> 은 <code>role-a</code> 로 설정이 가능하다.</li>
+</ul>
+<p>이 경우에도 <code>--profile</code> 옵션 역시 평소와 같이 쓰면 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">## default profile 을 사용한 명령</span>
+</span></span><span style="display:flex;"><span>$ aws s3 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## role-a profile 을 사용한 명령</span>
+</span></span><span style="display:flex;"><span>$ aws s3 --profile role-a
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">## target profile 을 사용한 명령</span>
+</span></span><span style="display:flex;"><span>$ aws s3 --profile target
+</span></span></code></pre></div>
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

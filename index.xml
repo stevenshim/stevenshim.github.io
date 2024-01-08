@@ -6,8 +6,36 @@
     <description>Recent content on 개발 못하는 개발자, 인프라 모르는 운영자</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
-    <lastBuildDate>Sat, 01 Jun 2019 00:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Fri, 24 Sep 2021 00:00:00 +0900</lastBuildDate>
     <atom:link href="https://stevenshim.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Route53 DNS Delegation (DNS 위임)</title>
+      <link>https://stevenshim.github.io/20210924-dns-deligation/2021-09-24-dns-deligation/</link>
+      <pubDate>Fri, 24 Sep 2021 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20210924-dns-deligation/2021-09-24-dns-deligation/</guid>
+      <description>개요 도메인 주소를 관리를 할 때, 주로 관리의 문제를 해소, 권한 분리 등의 주로 사용할 수 있는 방법으로, DNS Delegation (DNS 위임)을 사용할 수 있습니다.&#xA;이번 내용은 AWS Route53에서 DNS 위임을 어떻게 진행하는지, 실무 환경에서 활용 방법, 위임 시 주의할 점은 무엇인지 다뤄보려고 합니다.&#xA;개념의 용어(Term)로, 영어는 DNS Delegation, Domain Delegation, 한글은 도메인 위임, DNS 위임 등 다양하게 쓰이는 것으로 보입니다. Domain Delegation 혹은 도메인 위임이 틀린 용어인지는 모르겠으나, DNS Delegation 혹은 DNS 위임이라는 용어를 더 많이 사용하는 것으로 보입니다,</description>
+    </item>
+    <item>
+      <title>EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 2 글 쓰다가 만것</title>
+      <link>https://stevenshim.github.io/20210917-eks-airflow2/2021-09-17-eks-airflow-2/</link>
+      <pubDate>Fri, 17 Sep 2021 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20210917-eks-airflow2/2021-09-17-eks-airflow-2/</guid>
+      <description>Part 2 이번 파트에서는 Helm 을 이용하여 Airflow 2.x 를 설치해보려고 합니다.&#xA;어떤 Helm chart 를 써야 하나? 설치를 시작하기 전에 설명이 필요할 것 같습니다. 현 시점에 잘 알려진 Airflow Helm Chart 는 2개입니다.&#xA;Apache Airflow 의 공식 Helm Chart Official 이라고 볼 수 있겠네요 https://github.com/apache/airflow/tree/main/chart Github에 Mathew Wicks가 개발한 오래전부터 널리 퍼져 사용중인 Helm Chart Community 버전이라고 볼 수 있겠네요. https://github.com/airflow-helm/charts/tree/main/charts/airflow 이미 많이 사용되고 있는 Airflow helm chart는 Apache Airflow에서 제공하는 공식 Airflow helm char와 별개로, Github에 이전부터 공개되어있던 helm chart가 있기도 합니다.</description>
+    </item>
+    <item>
+      <title>EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 1 설치전 고려 사항들</title>
+      <link>https://stevenshim.github.io/20210911-eks-airflow1/2021-09-11-eks-airflow-1/</link>
+      <pubDate>Sat, 11 Sep 2021 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20210911-eks-airflow1/2021-09-11-eks-airflow-1/</guid>
+      <description>들어가며 이번 글은 운영환경에서도 쓸만한 수준의 Airflow 2.x 를 EKS 환경에 구축하는 내용을 다뤄보려고 합니다. 과거에 Airflow 1.x 을 파이프라인 도구 테스트 목적으로 아주 간단하게 사용한 경험은 있지만, 데이터 엔지니어만큼 심도 있게 사용해본 적도 없거니와, 신규 기능이 런칭을 것을 계속 확인한 것도 아니기에 자세히 알고 있진 않았습니다.&#xA;최근 개발팀의 요구 사항으로 Airflow 2.x 를 EKS에 구축을 하게 되었는데, Airflow의 특징, AWS와 EKS(Kubernetes)에 대한 기초 이상 수준의 이해가 필요하다 느껴져, 구축 경험을 글로 적어봅니다.</description>
+    </item>
+    <item>
+      <title>AWS CLI Profile 사용하기, AWS CLI 여러 계정 Config 설정</title>
+      <link>https://stevenshim.github.io/20190602-awscli-profile/2019-06-02-awscli-profile/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20190602-awscli-profile/2019-06-02-awscli-profile/</guid>
+      <description>Table of Contents&#xA;들어가며 Prerequisites AWS CLI Profile 설정 (기초) 기본 Profile 설정하기 Profile 추가하기 (Access Key Pair) AWS CLI Profile 설정 (중급) Profile 추가하기 (Role ARN) EC2에 할당된 IAM Role 을 이용하여 Profile 추가하기 (Role ARN) Source profile 에 다른 profile 사용하기 들어가며 AWS CLI 에는 하나 이상의 Profile 설정이 가능하고, 각 Profile 마다 Access Keypair 혹은 Assume Role 을 지정할 수 있다.&#xA;이 방식으로 다양한 Use-case 를 만들 수 있다.</description>
+    </item>
     <item>
       <title>AWS EC2에 SSH 쉽게 접속하기</title>
       <link>https://stevenshim.github.io/20190601-easy-ssh/2019-06-01-easy-ssh-ec2/</link>

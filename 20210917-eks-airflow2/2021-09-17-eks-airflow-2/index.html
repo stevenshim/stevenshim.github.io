@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko-kr">
+  <head>
+    <title>EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 2 글 쓰다가 만것 // 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.121.2">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Hojin Shim" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.5b1fcc8902588589c4767187402a3c29f8b8d7a6fdef6d9f8f77045bb0d14fee.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/><meta name="twitter:title" content="EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 2 글 쓰다가 만것"/>
+<meta name="twitter:description" content="Part 2 이번 파트에서는 Helm 을 이용하여 Airflow 2.x 를 설치해보려고 합니다.
+어떤 Helm chart 를 써야 하나? 설치를 시작하기 전에 설명이 필요할 것 같습니다. 현 시점에 잘 알려진 Airflow Helm Chart 는 2개입니다.
+Apache Airflow 의 공식 Helm Chart Official 이라고 볼 수 있겠네요 https://github.com/apache/airflow/tree/main/chart Github에 Mathew Wicks가 개발한 오래전부터 널리 퍼져 사용중인 Helm Chart Community 버전이라고 볼 수 있겠네요. https://github.com/airflow-helm/charts/tree/main/charts/airflow 이미 많이 사용되고 있는 Airflow helm chart는 Apache Airflow에서 제공하는 공식 Airflow helm char와 별개로, Github에 이전부터 공개되어있던 helm chart가 있기도 합니다."/>
+
+    <meta property="og:title" content="EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 2 글 쓰다가 만것" />
+<meta property="og:description" content="Part 2 이번 파트에서는 Helm 을 이용하여 Airflow 2.x 를 설치해보려고 합니다.
+어떤 Helm chart 를 써야 하나? 설치를 시작하기 전에 설명이 필요할 것 같습니다. 현 시점에 잘 알려진 Airflow Helm Chart 는 2개입니다.
+Apache Airflow 의 공식 Helm Chart Official 이라고 볼 수 있겠네요 https://github.com/apache/airflow/tree/main/chart Github에 Mathew Wicks가 개발한 오래전부터 널리 퍼져 사용중인 Helm Chart Community 버전이라고 볼 수 있겠네요. https://github.com/airflow-helm/charts/tree/main/charts/airflow 이미 많이 사용되고 있는 Airflow helm chart는 Apache Airflow에서 제공하는 공식 Airflow helm char와 별개로, Github에 이전부터 공개되어있던 helm chart가 있기도 합니다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://stevenshim.github.io/20210917-eks-airflow2/2021-09-17-eks-airflow-2/" /><meta property="article:section" content="20210917-eks-airflow2" />
+<meta property="article:published_time" content="2021-09-17T00:00:00+09:00" />
+<meta property="article:modified_time" content="2021-09-17T00:00:00+09:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://stevenshim.github.io/"><img class="app-header-avatar" src="/images/me.jpg" alt="Hojin Shim" /></a>
+      <span class="app-header-title">개발 못하는 개발자, 인프라 모르는 운영자</span>
+      <p>Site Reliability Engineer</p>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 2 글 쓰다가 만것</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Sep 17, 2021
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="part-2">Part 2</h1>
+<p>이번 파트에서는 Helm 을 이용하여 Airflow 2.x 를 설치해보려고 합니다.</p>
+<h2 id="어떤-helm-chart-를-써야-하나">어떤 Helm chart 를 써야 하나?</h2>
+<p>설치를 시작하기 전에 설명이 필요할 것 같습니다. 현 시점에 잘 알려진 Airflow Helm Chart 는 2개입니다.</p>
+<ul>
+<li>Apache Airflow 의 공식 Helm Chart
+<ul>
+<li>Official 이라고 볼 수 있겠네요</li>
+<li><a href="https://github.com/apache/airflow/tree/main/chart">https://github.com/apache/airflow/tree/main/chart</a></li>
+</ul>
+</li>
+<li>Github에 Mathew Wicks가 개발한 오래전부터 널리 퍼져 사용중인 Helm Chart
+<ul>
+<li>Community 버전이라고 볼 수 있겠네요.</li>
+<li><a href="https://github.com/airflow-helm/charts/tree/main/charts/airflow">https://github.com/airflow-helm/charts/tree/main/charts/airflow</a></li>
+</ul>
+</li>
+</ul>
+<p>이미 많이 사용되고 있는 Airflow helm chart는 Apache Airflow에서 제공하는 공식 Airflow helm char와 별개로, Github에 이전부터 공개되어있던 helm chart가 있기도 합니다.</p>
+<p><a href="https://github.com/airflow-helm/charts/issues/211">https://github.com/airflow-helm/charts/issues/211</a> 이슈에 등록된 내용은, Apahce Airflow 재단에서 개중인 Jarek Potiuk과, 별개로 진행되던 Airflow Helm chart 를 만든 개인 개발자 Mathew Wicks 과의 대화를 보시면 히스토리 파악에 도움이 됩니다.</p>
+<p>Mathew Wicks의 의견은 Airflow Helm Chart를 official로 통합하는것에 동의는 하고 있으며, 아직 일부 Official에 부족한 기능들이 있기 때문에 사용자들이 불편을 겪고 있으니, Official 기능이 충분히 좋아지면 본인이 개발중인 Helm Chart 사용자들을 독려해서 Official Airflow Helm Chart를 쓰도록 하겠다고 합니다.</p>
+<p>어떤 Helm Chart 를 사용하건 동일한 Airflow 가 설치되지만, 설치 과정에 약간의 추가 기능 차이, Value 검증 등에서는 차이를 보입니다.</p>
+<p>따라서, 사용자의 판단에 맡겨 테스트 해보시고 필요한걸로 사용하셔도 아직까지는 큰 문제는 없어 보입니다.</p>
+<p>이번 블로그 내용에서는 공식 문서에서 제공하는 helm chart 를 이용하여 설치를 해겠습니다.</p>
+<h2 id="설치-시작하기">설치 시작하기</h2>
+<p><a href="https://airflow.apache.org/docs/helm-chart/stable/index.html">Airflow Helm Chart</a> 공식 문서에 친절히 가이드가 나와있습니다.</p>
+<p>우선 Namespace 를 생성하고, Apache Airflow helm repo 를 등록합니다.</p>
+<blockquote>
+<p>작성 당시에는 Airflow Helm Chart 1.1.0 버전을 사용했습니다.<!-- raw HTML omitted -->
+여기서 1.1.0 버전은 Airflow의 버전이 아니라, Airflow Helm Chart 패키지 버전입니다.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ kubectl create namespace airflow
+</span></span><span style="display:flex;"><span>$ helm repo add apache-airflow https://airflow.apache.org
+</span></span><span style="display:flex;"><span>$ helm install airflow apache-airflow/airflow --namespace airflow
+</span></span></code></pre></div><p>설치가 잘 완료되었다면 아래와 같이 Pod들이 생성된 것을 볼 수 있습니다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ kubectl get po
+</span></span><span style="display:flex;"><span>NAME                                 READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>airflow-flower-7875769699-z2sv7      1/1     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span><span style="display:flex;"><span>airflow-postgresql-0                 1/1     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span><span style="display:flex;"><span>airflow-redis-0                      1/1     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span><span style="display:flex;"><span>airflow-scheduler-6588b7678d-znl8k   2/2     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span><span style="display:flex;"><span>airflow-statsd-75ff45fcbc-zb22k      1/1     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span><span style="display:flex;"><span>airflow-webserver-79845bbb9f-5wc6k   1/1     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span><span style="display:flex;"><span>airflow-worker-0                     2/2     Running   <span style="color:#ae81ff">0</span>          2m
+</span></span></code></pre></div><p>하지만 이 상태에서 Airflow 를 쓸만한 수준으로 설정하는건 이제 시작입니다.</p>
+<h2 id="valueyaml-파일-받기">value.yaml 파일 받기</h2>
+<p>Airflow Helm Chart 1.1.0 을 이용해 설치했으니, value.yaml 도 버전에 알맞게 찾아야 합니다.</p>
+<p><img src="/images/2021-09-11-eks-airflow/git-airflow-tag-110.png" alt=""><!-- raw HTML omitted -->
+<em>Figure 1 - 알맞는 Airflow Helm Chart 버전 Tag 찾기</em></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ wget https://raw.githubusercontent.com/apache/airflow/helm-chart/1.1.0/chart/values.yaml
+</span></span></code></pre></div><p>이제 이 values.yaml 파일을 이용해 운영환경에 맞게 개선하도록 하겠습니다.</p>
+<h2 id="외부-database-연결하기">외부 Database 연결하기</h2>
+<p>Airflow Helm Chart를 통해서 설치한 경우, 기본 값은 StatefulSet으로 postgresql을 설치해줍니다.
+문제는 이렇게 설치된 DB의 유지보수(보안 패치, 업그레이드, 백업, 접근제어 등) 모든 내용을 직접 해결해야 합니다.
+물론 회사에 DBA가 적극적으로 지원해주는게 가능하다면, Helm Chart로 설치하고 관리할 수 있습니다.</p>
+<p>values.yaml 의 database 설정 부분을 외부 연결할 DB에 알맞게 수정합니다.</p>
+<blockquote>
+<p>공식 문서 <a href="https://airflow.apache.org/docs/helm-chart/stable/production-guide.html">Production guide</a> 참고</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e">### 생략</span>
+</span></span><span style="display:flex;"><span>postgresql:
+</span></span><span style="display:flex;"><span>  enabled: false <span style="color:#75715e"># false로 변경하면 Statefulset으로 DB가 생성되지 않습니다.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">### 생략</span>
+</span></span><span style="display:flex;"><span>data:
+</span></span><span style="display:flex;"><span>  metadataConnection:
+</span></span><span style="display:flex;"><span>    user: airflow
+</span></span><span style="display:flex;"><span>    pass: airflow
+</span></span><span style="display:flex;"><span>    protocol: mysql
+</span></span><span style="display:flex;"><span>    host: airflow-metadabase.cluster-abcdefghijklmn.ap-northeast-2.rds.amazonaws.com
+</span></span><span style="display:flex;"><span>    port: <span style="color:#ae81ff">3306</span>
+</span></span><span style="display:flex;"><span>    db: airflow
+</span></span><span style="display:flex;"><span>    sslmode: disable
+</span></span><span style="display:flex;"><span><span style="color:#75715e">### 생략</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ helm upgrade -f values.yaml airflow apache-airflow/airflow
+</span></span></code></pre></div><p>외부 DB에 Security Group 설정이 알맞게</p>
+<h2 id="airflow-pod-전체-pod에-label-붙이기">Airflow Pod 전체 Pod에 Label 붙이기</h2>
+<p>EKS 환경에 Security Group for Pod(이하 SGP)를 활용한다면, Pod 전체에 Label을 붙이길 권장합니다.
+SGP를 적용할 때 Label Selector를 이용해 Pod에 Security Group을 할당하므로,<br>
+values.yaml에서 labels 항목을 수정합니다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># 기본값</span>
+</span></span><span style="display:flex;"><span>labels: <span style="color:#f92672">{}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 변경하기</span>
+</span></span><span style="display:flex;"><span>labels:
+</span></span><span style="display:flex;"><span>  app: airflow
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ helm upgrade -f values.yaml airflow apache-airflow/airflow
+</span></span></code></pre></div><h2 id="airflow-pod에-security-group-붙이기">Airflow Pod에 Security Group 붙이기</h2>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

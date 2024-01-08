@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>20210917-Eks-Airflow2s on 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link>https://stevenshim.github.io/20210917-eks-airflow2/</link>
+    <description>Recent content in 20210917-Eks-Airflow2s on 개발 못하는 개발자, 인프라 모르는 운영자</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Fri, 17 Sep 2021 00:00:00 +0900</lastBuildDate>
+    <atom:link href="https://stevenshim.github.io/20210917-eks-airflow2/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EKS에 Airflow 2.x (운영에 쓸만한 수준으로) 구축하기 - Part 2 글 쓰다가 만것</title>
+      <link>https://stevenshim.github.io/20210917-eks-airflow2/2021-09-17-eks-airflow-2/</link>
+      <pubDate>Fri, 17 Sep 2021 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20210917-eks-airflow2/2021-09-17-eks-airflow-2/</guid>
+      <description>Part 2 이번 파트에서는 Helm 을 이용하여 Airflow 2.x 를 설치해보려고 합니다.&#xA;어떤 Helm chart 를 써야 하나? 설치를 시작하기 전에 설명이 필요할 것 같습니다. 현 시점에 잘 알려진 Airflow Helm Chart 는 2개입니다.&#xA;Apache Airflow 의 공식 Helm Chart Official 이라고 볼 수 있겠네요 https://github.com/apache/airflow/tree/main/chart Github에 Mathew Wicks가 개발한 오래전부터 널리 퍼져 사용중인 Helm Chart Community 버전이라고 볼 수 있겠네요. https://github.com/airflow-helm/charts/tree/main/charts/airflow 이미 많이 사용되고 있는 Airflow helm chart는 Apache Airflow에서 제공하는 공식 Airflow helm char와 별개로, Github에 이전부터 공개되어있던 helm chart가 있기도 합니다.</description>
+    </item>
+  </channel>
+</rss>

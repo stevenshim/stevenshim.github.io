@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>20210924-Dns-Deligations on 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link>https://stevenshim.github.io/20210924-dns-deligation/</link>
+    <description>Recent content in 20210924-Dns-Deligations on 개발 못하는 개발자, 인프라 모르는 운영자</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Fri, 24 Sep 2021 00:00:00 +0900</lastBuildDate>
+    <atom:link href="https://stevenshim.github.io/20210924-dns-deligation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Route53 DNS Delegation (DNS 위임)</title>
+      <link>https://stevenshim.github.io/20210924-dns-deligation/2021-09-24-dns-deligation/</link>
+      <pubDate>Fri, 24 Sep 2021 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20210924-dns-deligation/2021-09-24-dns-deligation/</guid>
+      <description>개요 도메인 주소를 관리를 할 때, 주로 관리의 문제를 해소, 권한 분리 등의 주로 사용할 수 있는 방법으로, DNS Delegation (DNS 위임)을 사용할 수 있습니다.&#xA;이번 내용은 AWS Route53에서 DNS 위임을 어떻게 진행하는지, 실무 환경에서 활용 방법, 위임 시 주의할 점은 무엇인지 다뤄보려고 합니다.&#xA;개념의 용어(Term)로, 영어는 DNS Delegation, Domain Delegation, 한글은 도메인 위임, DNS 위임 등 다양하게 쓰이는 것으로 보입니다. Domain Delegation 혹은 도메인 위임이 틀린 용어인지는 모르겠으나, DNS Delegation 혹은 DNS 위임이라는 용어를 더 많이 사용하는 것으로 보입니다,</description>
+    </item>
+  </channel>
+</rss>
