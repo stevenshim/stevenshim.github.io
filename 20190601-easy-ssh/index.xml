@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>20190601-Easy-Sshs on 개발 못하는 개발자, 인프라 모르는 운영자</title>
+    <link>https://stevenshim.github.io/20190601-easy-ssh/</link>
+    <description>Recent content in 20190601-Easy-Sshs on 개발 못하는 개발자, 인프라 모르는 운영자</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Sat, 01 Jun 2019 00:00:00 +0900</lastBuildDate>
+    <atom:link href="https://stevenshim.github.io/20190601-easy-ssh/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS EC2에 SSH 쉽게 접속하기</title>
+      <link>https://stevenshim.github.io/20190601-easy-ssh/2019-06-01-easy-ssh-ec2/</link>
+      <pubDate>Sat, 01 Jun 2019 00:00:00 +0900</pubDate>
+      <guid>https://stevenshim.github.io/20190601-easy-ssh/2019-06-01-easy-ssh-ec2/</guid>
+      <description>매일같이 ssh 를 이용해 EC2에 접속하는 아래 과정이 매우 귀찮았다.&#xA;AWS Console Login EC2 List 조회 접속을 원하는 EC2 선택 Public IP 복사하기 터미널에서 ssh 명령어로 접속하기 EC2를 리스트로 출력하고 숫자만 쳐도 ssh 로 접속할 수 있는 간단한 script 를 작성하기로 했다. 결과 먼저 보기 소스코드(?)라고 하기에는 민망한 코드는 여기 있다.&#xA;https://github.com/stevenshim/easy-ssh-ec2&#xA;$ zz &amp;lt;--- 접속 명령 Num IP Name ID Type 1 54.111.111.111&#x9;my-test-server&#x9;i-05477041111111111&#x9;m5.large 2 54.111.222.222&#x9;jenkins-build&#x9;i-0655cbe1111111111&#x9;t3.</description>
+    </item>
+  </channel>
+</rss>
